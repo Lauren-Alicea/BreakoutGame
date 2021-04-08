@@ -8,7 +8,7 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     var ball:SKSpriteNode!
     var paddle:SKSpriteNode!
     
@@ -22,6 +22,8 @@ class GameScene: SKScene {
         let border = SKPhysicsBody(edgeLoopFrom: (view.scene?.frame)!)
         border.friction = 0
         self.physicsBody = border
+        
+        self.physicsWorld.contactDelegate = self
     }
     
     // Tells an object that one or more new touches occured. This will tell my paddle where to go based on my finger.
@@ -37,6 +39,19 @@ class GameScene: SKScene {
         for touch in touches {
             let touchLocation = touch.location(in: self)
             paddle.position.x = touchLocation.x
+        }
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        let bodyAName = contact.bodyA.node?.name
+        let bodyBName = contact.bodyB.node?.name
+        
+        if bodyAName == "Ball" && bodyBName == "Brick" || bodyAName == "Brick" && bodyBName == "Ball" {
+            if bodyAName == "Brick" {
+                contact.bodyA.node?.removeFromParent()
+            } else if bodyBName == "Brick" {
+                contact.bodyB.node?.removeFromParent()
+            }
         }
     }
     
