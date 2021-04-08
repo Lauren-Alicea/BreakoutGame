@@ -24,14 +24,20 @@ class GameScene: SKScene {
         self.physicsBody = border
     }
     
-    // Tells an object that one or more new touches occured.
+    // Tells an object that one or more new touches occured. This will tell my paddle where to go based on my finger.
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        for touch in touches {
+            let touchLocation = touch.location(in: self)
+            paddle.position.x = touchLocation.x
+        }
     }
     
-    // Allows you to move the paddle.
-    func touchMoved(toPoint pos : CGPoint) {
-        
+    // This will allow the paddle to move without jumping around in the screen.
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let touchLocation = touch.location(in: self)
+            paddle.position.x = touchLocation.x
+        }
     }
     
     // Tells us who wins or loses.
