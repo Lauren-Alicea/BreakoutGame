@@ -7,17 +7,34 @@
 
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var ball:SKSpriteNode!
     var paddle:SKSpriteNode!
+    var scoreLabel:SKLabelNode!
+    var score = 0 {
+        didSet {
+            scoreLabel.text = "Score:\(score)"
+        }
+    }
+    
+    var audioPlayer = AVAudioPlayer()
     
     // Tells you when the scene is presented by a view.
     override func didMove(to view: SKView) {
         ball = self.childNode(withName: "Ball") as? SKSpriteNode
         paddle = self.childNode(withName: "Paddle") as? SKSpriteNode
+        scoreLabel = self.childNode(withName: "Score") as? SKLabelNode
         
-        ball.physicsBody?.applyImpulse(CGVector(dx: 50, dy: 50))
+        let sound = Bundle.main.path(forResource: "brick", ofType: "wav")
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: sound!))
+        } catch {
+            print(error)
+        }
+        
+        ball.physicsBody?.applyImpulse(CGVector(dx: 45, dy: 45))
         
         let border = SKPhysicsBody(edgeLoopFrom: (view.scene?.frame)!)
         border.friction = 0
@@ -48,15 +65,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if bodyAName == "Ball" && bodyBName == "Brick" || bodyAName == "Brick" && bodyBName == "Ball" {
             if bodyAName == "Brick" {
+                audioPlayer.play()
                 contact.bodyA.node?.removeFromParent()
+                score += 1
             } else if bodyBName == "Brick" {
+                audioPlayer.play()
                 contact.bodyB.node?.removeFromParent()
+                score += 1
             }
         }
     }
     
     // Tells us who wins or loses.
     override func update(_ currentTime: TimeInterval) {
-        
+        if (score == 12) {
+            scoreLabel.text = "You Won!"
+            self.view?.isPaused = true
+        }
+        if (ball.position.y < paddle.position.y) {
+            scoreLabel.text = "You Lost!"
+            self.view?.isPaused = true
+        }
     }
 }
